@@ -1,0 +1,19 @@
+{
+  "actions": {
+    "seed_tasks": {
+      "method": "POST",
+      "url": "http://127.0.0.1:8766/seed",
+      "parameters": {"tasks": {"type": "array", "required": true}},
+      "success": {"path": ["ready"], "equals": true},
+      "timeout_s": 5
+    }
+  },
+  "checks": {
+    "demo_health": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8766/health",
+      "success": {"path": ["ready"], "equals": true},
+      "timeout_s": 5
+    }
+  }
+}

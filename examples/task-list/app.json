@@ -1,0 +1,5 @@
+{
+  "pages": ["pages/index/index"],
+  "window": {"navigationBarTitleText": "任务清单", "navigationBarBackgroundColor": "#ffffff"},
+  "style": "v2"
+}

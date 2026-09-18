@@ -1,0 +1,28 @@
+<view class="page">
+  <view class="eyebrow">MINIAPP PILOT DEMO</view>
+  <view class="title">任务清单</view>
+  <view class="description">创建、编辑和完成今天的任务</view>
+  <view class="editor">
+    <input value="{{title}}" bindinput="onTitle" placeholder="输入任务名称" maxlength="100" aria-label="任务名称" />
+    <button type="primary" bindtap="save">{{editingId ? '保存修改' : '添加任务'}}</button>
+  </view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view class="filters">
+    <button size="mini" data-filter="all" bindtap="filter">全部</button>
+    <button size="mini" data-filter="todo" bindtap="filter">未完成</button>
+    <button size="mini" data-filter="done" bindtap="filter">已完成</button>
+  </view>
+  <view class="task" wx:for="{{visibleTasks}}" wx:key="id">
+    <view class="task-title">{{item.title}}</view>
+    <view class="status">{{item.completed ? '已完成' : '未完成'}}</view>
+    <view class="actions">
+      <button size="mini" data-id="{{item.id}}" bindtap="edit">编辑</button>
+      <button size="mini" data-id="{{item.id}}" bindtap="toggle">{{item.completed ? '恢复任务' : '完成任务'}}</button>
+    </view>
+  </view>
+  <view wx:if="{{!visibleTasks.length}}" class="empty">暂无任务</view>
+  <view class="footer">
+    <button size="mini" bindtap="reset">重置演示数据</button>
+    <button size="mini" bindtap="loadFixtures">载入测试数据</button>
+  </view>
+</view>

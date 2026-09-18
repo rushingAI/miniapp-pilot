@@ -1,0 +1,14 @@
+page { background: #f5f6fa; color: #17233d; font-family: sans-serif; }
+.page { padding: 40rpx 32rpx; }
+.eyebrow { color: #5865a6; font-size: 20rpx; letter-spacing: 3rpx; }
+.title { font-size: 52rpx; font-weight: 700; margin: 18rpx 0; }
+.description { color: #65728b; font-size: 26rpx; margin-bottom: 32rpx; }
+.editor, .task { background: white; border-radius: 20rpx; padding: 26rpx; margin: 20rpx 0; }
+input { border-bottom: 1rpx solid #d6dae5; height: 80rpx; margin-bottom: 20rpx; }
+button[type="primary"] { background: #485cc7; }
+.filters, .actions, .footer { display: flex; gap: 12rpx; margin: 24rpx 0; }
+.filters button, .actions button, .footer button { margin: 0; }
+.task-title { font-size: 32rpx; font-weight: 600; }
+.status, .empty { color: #65728b; padding-top: 20rpx; }
+.error { color: #b3283a; margin: 20rpx 0; }
+.footer { margin-top: 44rpx; }

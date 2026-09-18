@@ -1,0 +1,7 @@
+{
+  "description": "Synthetic MiniApp Pilot task-list example",
+  "projectname": "miniapp-pilot-demo",
+  "miniprogramRoot": "./",
+  "compileType": "miniprogram",
+  "setting": {"es6": true}
+}

@@ -1,0 +1,21 @@
+name: Source candidate checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pytest -q
+        env:
+          MINIAPP_PILOT_DATA_DIR: ${{ runner.temp }}/miniapp-pilot
+      - run: node --test device-mcp/agent/web/tests/*.mjs tests/*.mjs
+      - run: python scripts/release_check.py

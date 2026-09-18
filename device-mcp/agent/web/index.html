@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiniApp Pilot · 小程序操作与测试</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"></span>
+    <span class="brand-name">MiniApp Pilot</span>
+    <span class="brand-sub">MINI PROGRAM TESTING</span>
+    <span class="app-version" id="appVersion" aria-live="polite" title="正在读取本地服务版本">v—</span>
+  </div>
+  <div class="topbar-right">
+    <div class="status-pill" id="companionStatus" data-state="checking" title="本地服务状态">
+      <span class="state-dot"></span><span id="companionStatusText">本地服务连接中</span>
+    </div>
+    <button class="status-pill status-button" id="deviceStatus" data-state="checking" title="查看或选择 USB 设备">
+      <span class="state-dot"></span><span id="deviceStatusText">正在检查设备</span>
+    </button>
+    <button class="status-pill status-button" id="settingsBtn" data-state="missing" title="打开本机设置">
+      <span class="state-dot"></span><span>⚙ 设置</span>
+    </button>
+    <button id="drawerToggle" class="drawer-toggle" title="展开/收起任务步骤">☰ 步骤</button>
+  </div>
+</header>
+<div id="app">
+  <main id="chatWrap">
+    <div id="chat">
+      <div class="chat-empty">
+        <div class="empty-mark" aria-hidden="true"></div>
+        <p class="empty-title">用自然语言测试你的小程序</p>
+        <p class="empty-sub">连接 Android 设备并配置模型后开始操作，或上传 Excel 用例执行回归测试。</p>
+      </div>
+    </div>
+    <div id="typing" class="hidden"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>&nbsp;<span id="typingText">思考中</span></div>
+    <div id="composer">
+      <div id="attachments" class="hidden"></div>
+      <div id="inputRow">
+        <div id="attachmentPicker" class="attachment-picker">
+          <button id="attachmentBtn" class="composer-icon-button" type="button" title="添加附件" aria-haspopup="menu" aria-expanded="false">＋</button>
+          <div id="attachmentMenu" class="attachment-menu hidden" role="menu">
+            <button id="localFileOption" type="button" role="menuitem"><span aria-hidden="true">📎</span><span>添加文件</span></button>
+            <button id="tencentSheetBtn" type="button" role="menuitem"><span aria-hidden="true">▦</span><span>腾讯文档导入</span></button>
+          </div>
+          <input type="file" id="fileInput" hidden>
+        </div>
+        <span id="providerBadge" title="当前 Agent 模型">Kimi K3</span>
+        <select id="effortSel" title="Kimi Agent 的推理模式">
+          <option value="none">关闭</option>
+          <option value="low" selected>Low</option>
+          <option value="high">High</option>
+          <option value="max">Max</option>
+        </select>
+        <textarea id="msgInput" rows="1" placeholder="发消息，或上传文件后加说明再发…"></textarea>
+        <button id="sendBtn" title="发送">↑</button>
+      </div>
+    </div>
+  </main>
+  <aside id="drawer">
+    <div class="drawer-head">
+      <span class="drawer-title">任务步骤 <span id="drawerStatus" class="drawer-status"></span></span>
+      <span class="ctl">
+        <button id="drawerClose" title="收起">✕</button>
+      </span>
+    </div>
+    <div id="drawerBody"></div>
+  </aside>
+  <aside id="device">
+    <div class="device-head">
+      <span>设备实时</span><span id="frameAge">等待首帧</span>
+    </div>
+    <div class="device-meta" id="deviceMeta">请连接一台 Android 手机</div>
+    <div class="device-frame">
+      <img id="screen" alt="等待设备画面…">
+      <div id="deviceOverlay" class="device-overlay">正在检查 USB/ADB…</div>
+    </div>
+  </aside>
+</div>
+<div id="settingsModal" class="hidden modal-shell" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="box settings-box">
+    <div class="box-badge">本机 Local Runtime</div>
+    <h2 id="settingsTitle">设置</h2>
+    <p class="settings-section-title">基础设置</p>
+    <div class="settings-list">
+      <div class="settings-card">
+        <span class="settings-card-icon" aria-hidden="true">◇</span>
+        <span class="settings-card-copy"><strong>模型服务</strong><small id="settingsProviderSummary">尚未连接</small></span>
+        <button id="providerSettingsOpen" class="secondary-button">配置</button>
+      </div>
+      <div class="settings-card">
+        <span class="settings-card-icon" aria-hidden="true">▯</span>
+        <span class="settings-card-copy"><strong>测试设备</strong><small id="settingsDeviceSummary">正在检查设备</small></span>
+        <button id="deviceSettingsOpen" class="secondary-button">选择</button>
+      </div>
+    </div>
+    <p class="settings-section-title">可选能力</p>
+    <div id="pluginSettingsList" class="settings-list">
+      <div class="settings-empty">正在读取已安装能力…</div>
+    </div>
+    <p id="settingsError" class="field-error hidden"></p>
+    <div class="modal-actions">
+      <button id="settingsClose" class="secondary-button">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div id="tencentSheetModal" class="hidden modal-shell" role="dialog" aria-modal="true" aria-labelledby="tencentSheetTitle">
+  <div class="box">
+    <div class="box-badge">在线测试用例</div>
+    <h2 id="tencentSheetTitle">读取腾讯在线表格</h2>
+    <p class="box-copy">读取当前在线内容并生成本次测试使用的 Excel 快照。在线原表不会被修改，测试结果仍下载到回填文件。</p>
+    <label class="field-label" for="tencentSheetUrl">腾讯表格链接</label>
+    <input id="tencentSheetUrl" type="url" autocomplete="off" spellcheck="false" placeholder="https://docs.qq.com/sheet/...">
+    <label class="field-label optional-field-label" for="tencentSheetToken">腾讯文档 MCP Token</label>
+    <input id="tencentSheetToken" type="password" autocomplete="off" spellcheck="false" placeholder="仅用于本次读取，不保存">
+    <p id="tencentSheetError" class="field-error hidden"></p>
+    <div class="modal-actions">
+      <button id="tencentSheetCancel" class="secondary-button">取消</button>
+      <button id="tencentSheetSubmit">读取并附加</button>
+    </div>
+  </div>
+</div>
+<div id="keyModal" class="hidden modal-shell" role="dialog" aria-modal="true" aria-labelledby="keyModalTitle">
+  <div class="box">
+    <div class="box-badge">本机安全设置</div>
+    <h2 id="keyModalTitle">连接 Kimi K3</h2>
+    <p class="box-copy">输入你自己的 Kimi Coding Plan API Key。可选择安全记住在此电脑；Key 不会写入浏览器存储或普通配置文件。</p>
+    <label class="field-label" for="keyInput">API Key</label>
+    <input id="keyInput" type="password" autocomplete="off" spellcheck="false" placeholder="粘贴 API Key">
+    <label class="field-label optional-field-label" for="baseUrlInput">ANTHROPIC_BASE_URL（可选）</label>
+    <input id="baseUrlInput" type="url" autocomplete="off" spellcheck="false" placeholder="https://api.kimi.com/coding/">
+    <p class="field-help">已连接时留空会沿用当前地址；首次留空使用 https://api.kimi.com/coding/</p>
+    <label class="field-label optional-field-label" for="modelInput">模型名称（可选）</label>
+    <input id="modelInput" type="text" autocomplete="off" spellcheck="false" placeholder="k3[1m]">
+    <p class="field-help">已连接时留空会沿用当前模型；填写后主 Agent 和子 Agent 使用同一模型。</p>
+    <label class="remember-provider" for="rememberProvider">
+      <input id="rememberProvider" type="checkbox">
+      <span><strong>记住此电脑</strong><small>Windows 使用 Credential Manager，macOS 使用 Keychain</small></span>
+    </label>
+    <p id="keyError" class="field-error hidden"></p>
+    <div class="modal-actions">
+      <button id="keyCancel" class="secondary-button">取消</button>
+      <button id="keySubmit">保存并连接</button>
+    </div>
+  </div>
+</div>
+<div id="pluginConfigModal" class="hidden modal-shell" role="dialog" aria-modal="true" aria-labelledby="pluginConfigTitle">
+  <div class="box">
+    <div class="box-badge" id="pluginConfigBadge">可选能力</div>
+    <h2 id="pluginConfigTitle">能力配置</h2>
+    <p class="box-copy" id="pluginConfigCopy"></p>
+    <label class="upload-drop" for="pluginConfigInput">
+      <span class="upload-icon" aria-hidden="true">↑</span>
+      <strong id="pluginConfigName">选择配置文件</strong>
+      <small id="pluginConfigHelp"></small>
+      <input id="pluginConfigInput" type="file" hidden>
+    </label>
+    <div id="pluginLinkImport" class="link-import hidden">
+      <div class="config-divider"><span>或者</span></div>
+      <h3 id="pluginLinkTitle">从在线表格读取</h3>
+      <label class="field-label" id="pluginLinkUrlLabel" for="pluginLinkUrl">在线表格链接</label>
+      <input id="pluginLinkUrl" type="url" autocomplete="off" spellcheck="false" placeholder="https://docs.qq.com/sheet/...">
+      <label class="field-label" id="pluginLinkTokenLabel" for="pluginLinkToken">访问 Token</label>
+      <input id="pluginLinkToken" type="password" autocomplete="off" spellcheck="false">
+      <p class="field-help" id="pluginLinkTokenHelp"></p>
+      <label class="remember-provider plugin-remember-token" for="pluginRememberToken">
+        <input id="pluginRememberToken" type="checkbox">
+        <span><strong>记住此电脑</strong><small>Token 仅保存到系统凭据库</small></span>
+      </label>
+      <button id="pluginLinkSubmit" type="button">读取并应用</button>
+      <div id="pluginLinkSource" class="online-source hidden">
+        <span><strong>当前来源</strong><a id="pluginLinkSourceUrl" target="_blank" rel="noreferrer"></a></span>
+        <small id="pluginLinkSyncedAt"></small>
+        <button id="pluginLinkRefresh" class="secondary-button" type="button">刷新最新内容</button>
+      </div>
+    </div>
+    <p id="pluginConfigResult" class="config-result hidden" role="status"></p>
+    <div class="modal-actions">
+      <button id="pluginConfigClose" class="secondary-button">关闭</button>
+      <button id="pluginConfigSubmit" disabled>应用配置</button>
+    </div>
+  </div>
+</div>
+<div id="deviceModal" class="hidden modal-shell" role="dialog" aria-modal="true" aria-labelledby="deviceModalTitle">
+  <div class="box">
+    <div class="box-badge">USB 设备</div>
+    <h2 id="deviceModalTitle">选择测试手机</h2>
+    <p class="box-copy" id="deviceHelp">首版同一台电脑一次只控制一台手机。</p>
+    <div id="deviceList" class="device-list"></div>
+    <div class="modal-actions">
+      <button id="deviceClose" class="secondary-button">关闭</button>
+    </div>
+  </div>
+</div>
+<div id="humanModal" class="hidden">
+  <div class="box">
+    <div class="box-badge">需要你</div>
+    <p id="humanQ"></p>
+    <input id="humanInput" placeholder="给出指示，如：已插好 USB，继续">
+    <button id="humanSubmit">提交并继续</button>
+  </div>
+</div>
+<div id="permissionModal" class="hidden modal-shell" role="dialog" aria-modal="true" aria-labelledby="permissionTitle">
+  <div class="box">
+    <div class="box-badge">一次性工具权限</div>
+    <h2 id="permissionTitle">允许执行这次 Bash？</h2>
+    <p id="permissionDescription" class="box-copy"></p>
+    <div class="modal-actions">
+      <button id="permissionDeny" class="secondary-button">拒绝</button>
+      <button id="permissionAllow">仅允许这一次</button>
+    </div>
+  </div>
+</div>
+<div id="suiteChoiceModal" class="hidden modal-shell" role="dialog" aria-modal="true" aria-labelledby="suiteChoiceTitle">
+  <div class="box suite-choice-box">
+    <div class="box-badge">当前测试未完成</div>
+    <h2 id="suiteChoiceTitle">这条消息要如何处理？</h2>
+    <p id="suiteChoiceDescription" class="box-copy">选择后系统会先处理旧测试状态，再执行刚才的消息。</p>
+    <div class="suite-choice-actions">
+      <button data-turn-mode="continue_active_suite">继续当前测试<small>保留 Suite 和当前步骤</small></button>
+      <button data-turn-mode="start_new_suite">开始新测试<small>旧测试结束为 interrupted</small></button>
+      <button class="secondary-button" data-turn-mode="unrelated_task">普通对话<small>保留旧测试，不操作测试现场</small></button>
+    </div>
+  </div>
+</div>
+<script type="module" src="ws.js"></script>
+</body>
+</html>
