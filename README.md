@@ -8,6 +8,8 @@
 
 ## 演示
 
+https://github.com/user-attachments/assets/dd24b87f-e08e-4294-a30e-eca7f0361ab6
+
 在微信官方示例中执行五个用例：输入替换、开关切换、单选、多选、返回目录。视频约 85 秒，裁剪画面、4 倍速播放。[实测记录](docs/validation.md#公开演示录像)
 
 ## 功能
